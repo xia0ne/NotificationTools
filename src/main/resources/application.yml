@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:5508/pushtools
+    username: root
+    password: root
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: mapper/**.xml
+
+pushTools:
+  api: "https://api2.pushdeer.com"
+
+logging:
+  level:
+    root: debug
+  file:
+    path: logs
