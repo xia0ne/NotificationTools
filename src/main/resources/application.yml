@@ -10,7 +10,7 @@ mybatis-plus:
   mapper-locations: mapper/**.xml
 
 pushTools:
-  api: "https://api2.pushdeer.com"
+  api: https://api2.pushdeer.com
 
 logging:
   level:

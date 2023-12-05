@@ -11,8 +11,8 @@ import java.util.Date;
 @Log
 @Component
 public class CronTest {
-	@Scheduled(cron = "0/1 * * ? * ?")
-	public void cron() {
-		log.info("定时执行，时间 " + DateUtil.now());
-	}
+//	@Scheduled(cron = "0/1 * * ? * ?")
+//	public void cron() {
+//		log.info("定时执行，时间 " + DateUtil.now());
+//	}
 }
