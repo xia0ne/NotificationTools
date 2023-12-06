@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>定时提醒小助手</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css"/>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+<form id="taskForm">
+    <label for="taskInput">PushKey:</label>
+    <input type="text" id="taskInput" name="taskInput" required>
+
+    <label for="taskSelect">Select Task:</label>
+    <select id="taskSelect" name="taskSelect">
+        <option value="0">定时喝水</option>
+        <option value="1">定时提肛</option>
+    </select>
+
+    <button type="button" onclick="submitForm()">Submit</button>
+</form>
+<div id="result">
+<span id="resultOutPut"></span>
+</div>
+<div id="hint">
+    <p><a href="https://github.com/easychen/pushdeer" target="_blank" rel="noopener noreferrer">什么是 Push Key？</a></p>
+    <p><a href="https://github.com/xia0ne/NotificationTools/issues" target="_blank" rel="noopener noreferrer">需要更多的提醒？</a></p>
+</div>
+
+<script>
+    function submitForm() {
+        var taskValue = document.getElementById("taskInput").value;
+        var selectValue = document.getElementById("taskSelect").value;
+        var result = document.getElementById("resultOutPut")
+        if(taskValue === "" || selectValue === ""){
+            document.getElementById("result").style.display = "block";
+            result.innerText = "请输入正确的key或者选择正确的任务";
+            result.style.color = "red";
+            setTimeout(()=>{
+                result.innerText = "";
+                document.getElementById("result").style.display = "none";
+            }, 5000);
+            return;
+        }
+
+        var data = {
+            "key": taskValue,
+            "task": parseInt(selectValue),
+        };
+        $.ajax({
+            type: "POST",
+            dataType: "JSON",
+            url: "/api/add",
+            data : data,
+            async: false,
+            success: (e) => {
+                document.getElementById("result").style.display = "block";
+                if(e.status === "200"){
+                    result.innerText = "添加成功，你应该会收到一条确认推送。"
+                }else{
+                    result.innerText = "添加失败,错误信息: \n" + e.data;
+                }
+            },
+            error: (e) => {
+                document.getElementById("result").style.display = "block";
+                result.innerText = "系统出现了一些问题...."
+            },
+        });
+    }
+</script>
+</body>
+</html>

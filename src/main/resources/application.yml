@@ -4,6 +4,8 @@ spring:
     url: jdbc:mysql://localhost:5508/pushtools
     username: root
     password: root
+  mvc:
+    static-path-pattern: /static/**
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

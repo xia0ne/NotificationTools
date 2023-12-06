@@ -18,7 +18,13 @@ public class TaskController {
 
 	@Autowired
 	TaskServiceImpl taskService;
+
+	@RequestMapping(value = "/test", method = RequestMethod.GET)
+	public ResponseResult<String> test(){
+		return ResponseResult.success("test");
+	}
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
+	@ResponseBody
 	public ResponseResult<TaskEntity> handleAdd(@RequestParam("key") String key,
 																							@RequestParam("task") int task) throws Exception {
 		if(task > TaskConfig.getLength()){
