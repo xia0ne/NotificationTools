@@ -12,15 +12,25 @@
     <input type="text" id="taskInput" name="taskInput" required>
 
     <label for="taskSelect">Select Task:</label>
-    <select id="taskSelect" name="taskSelect">
+    <select id="taskSelect" name="taskSelect" onchange="handleTaskSelectChange()">
         <option value="0">定时喝水</option>
         <option value="1">定时提肛</option>
+        <option value="custom">自定义</option>
     </select>
+
+    <div id="customInputTask" style="display: none;">
+        <label for="customTaskInput">自定义消息:</label>
+        <input type="text" id="customTaskInput" name="customTaskInput">
+    </div>
+    <div id="customInputCron" style="display: none;">
+        <label for="customCronInput">自定义表达式:</label>
+        <input type="text" id="customCronInput" name="customCronInput">
+    </div>
 
     <button type="button" onclick="submitForm()">Submit</button>
 </form>
 <div id="result">
-<span id="resultOutPut"></span>
+    <span id="resultOutPut"></span>
 </div>
 <div id="hint">
     <table>
@@ -31,59 +41,106 @@
             <th>定时说明</th>
         </tr>
         <tr>
+            <td>-1</td>
+            <td>自定义任务</td>
+            <td>自定义消息</td>
+            <td>自定义表达式，请不要提交执行周期低于10分钟的任务</td>
+        </tr>
+        <tr>
             <td>0</td>
             <td>定时喝水</td>
             <td>每隔一定时间提醒你喝水</td>
-            <td>0 0 8/2 * * ? </td>
+            <td>0 0 8/2 * * ?</td>
         </tr>
         <tr>
             <td>1</td>
             <td>定时提肛</td>
             <td>每隔一定时间提醒你做一些伸展运动</td>
-            <td>0 0 8/3 * * ? </td>
+            <td>0 0 8/3 * * ?</td>
         </tr>
     </table>
     <p><a href="https://github.com/easychen/pushdeer" target="_blank" rel="noopener noreferrer">什么是 Push Key？</a></p>
-    <p><a href="https://github.com/xia0ne/NotificationTools/issues" target="_blank" rel="noopener noreferrer">需要更多的提醒？</a></p>
+    <p><a href="https://github.com/xia0ne/NotificationTools/issues" target="_blank"
+          rel="noopener noreferrer">需要更多的提醒？</a></p>
+    <p><a href="https://cron.qqe2.com/" target="_blank">生成cron表达式</a></p>
 </div>
 
 <script>
+    function handleTaskSelectChange() {
+        var taskSelect = document.getElementById("taskSelect");
+        var customInputTask = document.getElementById("customInputTask");
+        var customInputCron = document.getElementById("customInputCron");
+
+        if (taskSelect.value === "custom") {
+            customInputTask.style.display = "block";
+            customInputCron.style.display = "block";
+        } else {
+            customInputTask.style.display = "none";
+            customInputCron.style.display = "none";
+        }
+    }
+
     function submitForm() {
         var taskValue = document.getElementById("taskInput").value;
         var selectValue = document.getElementById("taskSelect").value;
+        var customTaskInput = document.getElementById("customTaskInput").value;
+        var customCronInput = document.getElementById("customCronInput").value;
         var result = document.getElementById("resultOutPut")
-        if(taskValue === "" || selectValue === ""){
+        if (taskValue === "" || selectValue === "") {
             document.getElementById("result").style.display = "block";
             result.innerText = "请输入正确的key或者选择正确的任务";
             result.style.color = "red";
-            setTimeout(()=>{
+            setTimeout(() => {
                 result.innerText = "";
                 document.getElementById("result").style.display = "none";
-            }, 5000);
+            }, 2000);
             return;
         }
-
-        var data = {
+        if (selectValue === "custom") {
+            if (customTaskInput === "" || customCronInput === "") {
+                document.getElementById("result").style.display = "block";
+                result.innerText = "请输入自定义内容";
+                result.style.color = "red";
+                setTimeout(() => {
+                    result.innerText = "";
+                    document.getElementById("result").style.display = "none";
+                }, 2000);
+                return;
+            }
+        }
+        var data = selectValue === "custom" ? {
+            "key": taskValue,
+            "rule": customCronInput,
+            "message": customTaskInput,
+        } : {
             "key": taskValue,
             "task": parseInt(selectValue),
         };
         $.ajax({
             type: "POST",
             dataType: "JSON",
-            url: "/api/add",
-            data : data,
+            url: selectValue === "custom" ? "/api/custom" : "/api/add",
+            data: data,
             async: false,
             success: (e) => {
                 document.getElementById("result").style.display = "block";
-                if(e.status === "200"){
+                if (e.status === "200") {
                     result.innerText = "添加成功，你应该会收到一条确认推送。"
-                }else{
-                    result.innerText = "添加失败,错误信息: \n" + e.data;
+                } else {
+                    result.innerText = "添加失败,错误信息: \n" + e.message;
                 }
+                setTimeout(() => {
+                    result.innerText = "";
+                    document.getElementById("result").style.display = "none";
+                }, 2000);
             },
             error: (e) => {
                 document.getElementById("result").style.display = "block";
                 result.innerText = "系统出现了一些问题...."
+                setTimeout(() => {
+                    result.innerText = "";
+                    document.getElementById("result").style.display = "none";
+                }, 2000);
             },
         });
     }

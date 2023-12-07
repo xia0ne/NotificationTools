@@ -72,6 +72,8 @@ public class TaskConfig implements SchedulingConfigurer {
 	public static String getCron(int id){
 		return crontab[id];
 	}
-
+	public static String getMessage(int id){
+		return messages[id];
+	}
 
 }

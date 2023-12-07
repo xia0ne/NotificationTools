@@ -1,8 +1,8 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/pushtools
-    username: pushtools
+    url: jdbc:mysql://localhost:5508/pushtools
+    username: root
     password: root
   mvc:
     static-path-pattern: /static/**

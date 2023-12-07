@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import com.example.notificationtools.config.TaskConfig;
 import com.example.notificationtools.domain.entity.TaskEntity;
 import com.example.notificationtools.service.impl.TaskServiceImpl;
+import com.example.notificationtools.utils.CheckCrontab;
 import com.example.notificationtools.utils.ResponseResult;
 import com.example.notificationtools.utils.SendMessage;
 import jdk.jshell.execution.Util;
@@ -20,18 +21,24 @@ public class TaskController {
 	TaskServiceImpl taskService;
 
 	@RequestMapping(value = "/test", method = RequestMethod.GET)
-	public ResponseResult<String> test(){
+	public ResponseResult<String> test() {
 		return ResponseResult.success("test");
 	}
-	@RequestMapping(value = "/add", method = RequestMethod.POST)
+
+	@RequestMapping(value = "/custom", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseResult<TaskEntity> handleAdd(@RequestParam("key") String key,
-																							@RequestParam("task") int task) throws Exception {
-		if(task > TaskConfig.getLength()){
-			return ResponseResult.fail("not found the tasks!");
+	public ResponseResult<String> handleCustom(@RequestParam("key") String key,
+																						 @RequestParam("rule") String rule,
+																						 @RequestParam("message") String message) throws Exception {
+
+		if (!CheckCrontab.isValidCronExpression(rule)) {
+			return ResponseResult.fail("Incorrect Crontab rules!");
 		}
-		TaskEntity success = taskService.addToDataBases(task, key, TaskConfig.getCron(task));
-		if(success == null){
+		if (!CheckCrontab.isFrequencyGreaterThan10Minutes(rule)) {
+			return ResponseResult.fail("The crontab rule is too frequent, please do not submit tasks with a cycle of less than 10 minutes!");
+		}
+		TaskEntity success = taskService.addToDataBases(-1, key, rule, message);
+		if (success == null) {
 			return ResponseResult.fail("Add failed, it is possible that this task has been added before");
 		}
 		new Thread(() -> {
@@ -42,6 +49,28 @@ public class TaskController {
 			}
 		}).start();
 		TaskConfig.addTask(success);
-		return ResponseResult.success(success);
+		return ResponseResult.success("successful!");
+	}
+
+	@RequestMapping(value = "/add", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseResult<String> handleAdd(@RequestParam("key") String key,
+																					@RequestParam("task") int task) throws Exception {
+		if (task > TaskConfig.getLength()) {
+			return ResponseResult.fail("not found the tasks!");
+		}
+		TaskEntity success = taskService.addToDataBases(task, key, TaskConfig.getCron(task), TaskConfig.getMessage(task));
+		if (success == null) {
+			return ResponseResult.fail("Add failed, it is possible that this task has been added before");
+		}
+		new Thread(() -> {
+			try {
+				SendMessage.sendMessage(key, DateUtil.now() + " 当你收到这条消息，代表添加成功");
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}).start();
+		TaskConfig.addTask(success);
+		return ResponseResult.success("successful!");
 	}
 }

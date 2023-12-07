@@ -14,11 +14,12 @@ import java.util.List;
 public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> implements TaskService {
 
 	@Override
-	public TaskEntity addToDataBases(int belong_id, String taskKey, String crontab_rule) {
+	public TaskEntity addToDataBases(int belong_id, String taskKey, String crontab_rule, String message) {
 		QueryWrapper<TaskEntity> queryWrapper = new QueryWrapper<>();
 		queryWrapper.eq("belong_id", belong_id)
 						.eq("crontab_rule", crontab_rule)
-						.eq("task_key", taskKey);
+						.eq("task_key", taskKey)
+						.eq("message", message);
 		List<TaskEntity> tasks = list(queryWrapper);
 		if(!tasks.isEmpty()){
 			return null;
@@ -29,6 +30,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
 		taskEntity.setBelongId(belong_id);
 		taskEntity.setStartTime(new Date());
 		taskEntity.setEndTime(new Date());
+		taskEntity.setMessage(message);
 		if(save(taskEntity)){
 			return taskEntity;
 		}else{

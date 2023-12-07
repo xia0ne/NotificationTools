@@ -19,6 +19,8 @@ public class TaskEntity {
 	private Integer belongId;
 	@TableField("crontab_rule")
 	private String crontabRule;
+	@TableField("message")
+	private String message;
 	@TableField("start_time")
 	private Date startTime;
 	@TableField("end_time")
