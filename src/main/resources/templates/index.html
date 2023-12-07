@@ -129,10 +129,18 @@
                 } else {
                     result.innerText = "添加失败,错误信息: \n" + e.message;
                 }
+                setTimeout(() => {
+                    result.innerText = "";
+                    document.getElementById("result").style.display = "none";
+                }, 2000);
             },
             error: (e) => {
                 document.getElementById("result").style.display = "block";
                 result.innerText = "系统出现了一些问题...."
+                setTimeout(() => {
+                    result.innerText = "";
+                    document.getElementById("result").style.display = "none";
+                }, 2000);
             },
         });
     }
