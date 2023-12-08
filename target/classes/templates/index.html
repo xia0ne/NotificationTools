@@ -64,8 +64,82 @@
           rel="noopener noreferrer">需要更多的提醒？</a></p>
     <p><a href="https://cron.qqe2.com/" target="_blank">生成cron表达式</a></p>
 </div>
+<div id="hint1">
+    <div id="task-section">
+        <h2>系统任务数</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>任务编号</th>
+                <th>任务数量</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="log-section">
+        <h2>最新日志</h2>
+        <div class="log-content">
+        </div>
+        <div class="expand-btn" onclick="toggleLog()">查看更多日志</div>
+    </div>
+</div>
 
 <script>
+
+    function toggleLog() {
+        const logContent = document.querySelector('#log-section .log-content');
+        const expandBtn = document.querySelector('#log-section .expand-btn');
+
+        if (logContent.style.display === 'block') {
+            logContent.style.display = 'none';
+            expandBtn.innerText = "点我展开";
+        } else {
+            logContent.style.display = 'block';
+            expandBtn.innerText = "点我隐藏";
+        }
+    }
+
+    fetch('/logs/count')
+        .then(response => response.json())
+        .then(data => renderTaskTable(data))
+        .catch(error => console.error('Error fetching task data:', error));
+
+    function renderTaskTable(data) {
+        const taskTableBody = document.querySelector('#task-section tbody');
+        taskTableBody.innerHTML = '';
+
+        data.data.forEach(task => {
+            for (const key in task) {
+                const row = taskTableBody.insertRow();
+                const typeCell = row.insertCell(0);
+                const countCell = row.insertCell(1);
+
+                typeCell.textContent = key;
+                countCell.textContent = task[key];
+            }
+        });
+    }
+
+    fetch('/logs/getlogs')
+        .then(response => response.json())
+        .then(data => renderLogContent(data))
+        .catch(error => console.error('Error fetching log data:', error));
+
+    function renderLogContent(data) {
+        const logContent = document.querySelector('#log-section .log-content');
+        logContent.innerHTML = '';
+        console.log(data);
+        data.data.forEach(logEntry => {
+            const logEntryElement = document.createElement('div');
+            logEntryElement.textContent = logEntry;
+            logContent.appendChild(logEntryElement);
+        });
+    }
+
+
     function handleTaskSelectChange() {
         var taskSelect = document.getElementById("taskSelect");
         var customInputTask = document.getElementById("customInputTask");
