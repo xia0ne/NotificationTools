@@ -3,10 +3,13 @@ package com.example.notificationtools.controller;
 import cn.hutool.core.date.DateUtil;
 import com.example.notificationtools.config.TaskConfig;
 import com.example.notificationtools.domain.entity.TaskEntity;
+import com.example.notificationtools.service.ScheduleService;
+import com.example.notificationtools.service.impl.RedisServiceImpl;
 import com.example.notificationtools.service.impl.TaskServiceImpl;
 import com.example.notificationtools.utils.CheckCrontab;
 import com.example.notificationtools.utils.ResponseResult;
 import com.example.notificationtools.utils.SendMessage;
+import jakarta.annotation.Resource;
 import jdk.jshell.execution.Util;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +20,13 @@ import org.springframework.web.bind.annotation.*;
 @Log
 public class TaskController {
 
-	@Autowired
+	@Resource
 	TaskServiceImpl taskService;
+	@Resource
+	RedisServiceImpl redisService;
+
+	@Resource
+	ScheduleService scheduleService;
 
 	@RequestMapping(value = "/test", method = RequestMethod.GET)
 	public ResponseResult<String> test() {
@@ -44,11 +52,13 @@ public class TaskController {
 		new Thread(() -> {
 			try {
 				SendMessage.sendMessage(key, DateUtil.now() + " 当你收到这条消息，代表添加成功");
+				redisService.setLog(DateUtil.now() + " : " + success.getId());
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}).start();
-		TaskConfig.addTask(success);
+		scheduleService.addTask(success);
+		redisService.setCount(success.getBelongId());
 		return ResponseResult.success("successful!");
 	}
 
@@ -56,21 +66,23 @@ public class TaskController {
 	@ResponseBody
 	public ResponseResult<String> handleAdd(@RequestParam("key") String key,
 																					@RequestParam("task") int task) throws Exception {
-		if (task > TaskConfig.getLength()) {
+		if (task > scheduleService.getLength()) {
 			return ResponseResult.fail("not found the tasks!");
 		}
-		TaskEntity success = taskService.addToDataBases(task, key, TaskConfig.getCron(task), TaskConfig.getMessage(task));
+		TaskEntity success = taskService.addToDataBases(task, key, scheduleService.getCron(task), scheduleService.getMessage(task));
 		if (success == null) {
 			return ResponseResult.fail("Add failed, it is possible that this task has been added before");
 		}
 		new Thread(() -> {
 			try {
 				SendMessage.sendMessage(key, DateUtil.now() + " 当你收到这条消息，代表添加成功");
+				redisService.setLog(DateUtil.now() + " : " + success.getId());
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}).start();
-		TaskConfig.addTask(success);
+		scheduleService.addTask(success);
+		redisService.setCount(success.getBelongId());
 		return ResponseResult.success("successful!");
 	}
 }

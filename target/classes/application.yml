@@ -6,6 +6,12 @@ spring:
     password: root
   mvc:
     static-path-pattern: /static/**
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 123321
+      database: 1
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
