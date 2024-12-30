@@ -5,14 +5,14 @@ import com.example.notificationtools.domain.entity.TaskEntity;
 import java.util.List;
 
 public interface ScheduleService {
-	public void setTaskScheduler(TaskEntity task);
+	void setTaskScheduler(TaskEntity task);
 
-	public void addTask(TaskEntity task);
+	void addTask(TaskEntity task);
 
-	public int getLength();
+	int getLength();
 
-	public String getCron(int id);
+	String getCron(int id);
 
-	public String getMessage(int id);
+	String getMessage(int id);
 	
 }

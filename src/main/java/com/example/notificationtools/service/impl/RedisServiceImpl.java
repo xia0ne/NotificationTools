@@ -58,11 +58,14 @@ public class RedisServiceImpl implements RedisService {
 
 
 	@Override
-	public boolean setLog(String logs) {
+	public boolean saveLogs(String logs) {
 		log.info("setLog " + logs);
 		try {
 			redisTemplate.opsForList().rightPush("logs", logs);
 			Long size = redisTemplate.opsForList().size("logs");
+			if (size == null) {
+				return false;
+			}
 			if (size > 10) {
 				redisTemplate.opsForList().trim("log", size - 10, size);
 			}

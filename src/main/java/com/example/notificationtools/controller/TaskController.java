@@ -18,7 +18,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 @Log
-public class TaskController {
+public class
+TaskController {
 
 	@Resource
 	TaskServiceImpl taskService;
@@ -52,7 +53,7 @@ public class TaskController {
 		new Thread(() -> {
 			try {
 				SendMessage.sendMessage(key, DateUtil.now() + " 当你收到这条消息，代表添加成功");
-				redisService.setLog(DateUtil.now() + " : " + success.getId());
+				redisService.saveLogs(DateUtil.now() + " : " + success.getId());
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -76,7 +77,7 @@ public class TaskController {
 		new Thread(() -> {
 			try {
 				SendMessage.sendMessage(key, DateUtil.now() + " 当你收到这条消息，代表添加成功");
-				redisService.setLog(DateUtil.now() + " : " + success.getId());
+				redisService.saveLogs(DateUtil.now() + " : " + success.getId());
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

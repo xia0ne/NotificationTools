@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 public interface RedisService {
-	public boolean setCount(int taskId);
+	boolean setCount(int taskId);
 
-	public List<HashMap<Integer, Object>> getCount();
+	List<HashMap<Integer, Object>> getCount();
 
-	public boolean setLog(String logs);
+	boolean saveLogs(String logs);
 
-	public List<Object> getLogs(int index, int offset);
+	List<Object> getLogs(int index, int offset);
 }

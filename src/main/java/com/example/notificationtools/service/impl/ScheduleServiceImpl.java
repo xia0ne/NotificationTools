@@ -28,7 +28,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 	@Override
 	public void setTaskScheduler(TaskEntity task) {
 		try {
-			redisService.setLog(DateUtil.now() + " : " + task.getId());
+			redisService.saveLogs(DateUtil.now() + " : " + task.getId());
 			log.info("定时执行，时间" + DateUtil.now() + "，内容" + messages[task.getBelongId()]);
 			SendMessage.sendMessage(task.getTaskKey(), messages[task.getBelongId()]);
 		} catch (Exception e) {
