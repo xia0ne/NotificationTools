@@ -3,10 +3,7 @@ package com.example.notificationtools.utils;
 import cn.hutool.core.date.DateUtil;
 import org.quartz.CronExpression;
 
-import java.text.ParseException;
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CheckCrontab {
 
@@ -18,9 +15,16 @@ public class CheckCrontab {
 		try {
 			CronExpression cronExpression = new CronExpression(crontab);
 			Date now = DateUtil.date();
-			long nextExecutionTime = cronExpression.getNextValidTimeAfter(now).getTime();
-			long differenceInMinutes = (nextExecutionTime - now.getTime()) / (60 * 1000);
-			return differenceInMinutes > 10;
+			Date first = cronExpression.getNextValidTimeAfter(now);
+			if (first == null) {
+				return false;
+			}
+			Date second = cronExpression.getNextValidTimeAfter(first);
+			if (second == null) {
+				return false;
+			}
+			long intervalInMinutes = (second.getTime() - first.getTime()) / (60 * 1000);
+			return intervalInMinutes >= 10;
 		} catch (Exception e) {
 			return false;
 		}

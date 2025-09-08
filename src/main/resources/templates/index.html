@@ -200,6 +200,16 @@
                 document.getElementById("result").style.display = "block";
                 if (e.status === "200") {
                     result.innerText = "添加成功，你应该会收到一条确认推送。"
+                    // 刷新系统任务数
+                    fetch('/logs/count')
+                        .then(response => response.json())
+                        .then(data => renderTaskTable(data))
+                        .catch(error => console.error('Error fetching task data:', error));
+                    // 刷新最新日志
+                    fetch('/logs/getlogs')
+                        .then(response => response.json())
+                        .then(data => renderLogContent(data))
+                        .catch(error => console.error('Error fetching log data:', error));
                 } else {
                     result.innerText = "添加失败,错误信息: \n" + e.message;
                 }
