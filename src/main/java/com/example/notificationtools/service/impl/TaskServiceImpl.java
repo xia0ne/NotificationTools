@@ -15,14 +15,9 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
 
 	@Override
 	public TaskEntity addToDataBases(int belong_id, String taskKey, String crontab_rule, String message) {
-		QueryWrapper<TaskEntity> queryWrapper = new QueryWrapper<>();
-		queryWrapper.eq("belong_id", belong_id)
-						.eq("crontab_rule", crontab_rule)
-						.eq("task_key", taskKey)
-						.eq("message", message);
-		List<TaskEntity> tasks = list(queryWrapper);
-		if(!tasks.isEmpty()){
-			return null;
+		TaskEntity existing = findExisting(belong_id, taskKey, crontab_rule, message);
+		if(existing != null){
+			return existing;
 		}
 		TaskEntity taskEntity = new TaskEntity();
 		taskEntity.setCrontabRule(crontab_rule);
@@ -36,5 +31,19 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskEntity> impleme
 		}else{
 			return null;
 		}
+	}
+
+	@Override
+	public TaskEntity findExisting(int belong_id, String taskKey, String crontab_rule, String message){
+		QueryWrapper<TaskEntity> queryWrapper = new QueryWrapper<>();
+		queryWrapper.eq("belong_id", belong_id)
+					.eq("crontab_rule", crontab_rule)
+					.eq("task_key", taskKey)
+					.eq("message", message);
+		List<TaskEntity> tasks = list(queryWrapper);
+		if(!tasks.isEmpty()){
+			return tasks.get(0);
+		}
+		return null;
 	}
 }

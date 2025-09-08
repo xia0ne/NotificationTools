@@ -1,7 +1,6 @@
 package com.example.notificationtools.controller;
 
 import cn.hutool.core.date.DateUtil;
-import com.example.notificationtools.config.TaskConfig;
 import com.example.notificationtools.domain.entity.TaskEntity;
 import com.example.notificationtools.service.ScheduleService;
 import com.example.notificationtools.service.impl.RedisServiceImpl;
@@ -10,9 +9,7 @@ import com.example.notificationtools.utils.CheckCrontab;
 import com.example.notificationtools.utils.ResponseResult;
 import com.example.notificationtools.utils.SendMessage;
 import jakarta.annotation.Resource;
-import jdk.jshell.execution.Util;
 import lombok.extern.java.Log;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -46,6 +43,10 @@ TaskController {
 		if (!CheckCrontab.isFrequencyGreaterThan10Minutes(rule)) {
 			return ResponseResult.fail("The crontab rule is too frequent, please do not submit tasks with a cycle of less than 10 minutes!");
 		}
+		TaskEntity exists = taskService.findExisting(-1, key, rule, message);
+		if (exists != null) {
+			return ResponseResult.fail("Add failed, it is possible that this task has been added before");
+		}
 		TaskEntity success = taskService.addToDataBases(-1, key, rule, message);
 		if (success == null) {
 			return ResponseResult.fail("Add failed, it is possible that this task has been added before");
@@ -69,6 +70,10 @@ TaskController {
 																					@RequestParam("task") int task) throws Exception {
 		if (task > scheduleService.getLength()) {
 			return ResponseResult.fail("not found the tasks!");
+		}
+		TaskEntity exists = taskService.findExisting(task, key, scheduleService.getCron(task), scheduleService.getMessage(task));
+		if (exists != null) {
+			return ResponseResult.fail("Add failed, it is possible that this task has been added before");
 		}
 		TaskEntity success = taskService.addToDataBases(task, key, scheduleService.getCron(task), scheduleService.getMessage(task));
 		if (success == null) {
